@@ -4,55 +4,22 @@
 <%@page import="com.google.appengine.api.channel.ChannelServiceFactory"%>
 <%@page import="com.google.appengine.api.channel.ChannelService"%>
 <%@page import="java.util.Random"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<jsp:include page="jsp/headerSection.jsp"></jsp:include>
 
 <%
-	String clientID = "CL_ID_" + System.currentTimeMillis() + "_" + Math.abs(new Random().nextInt());
-	ChannelService channelService = ChannelServiceFactory.getChannelService();
-	String channelToken = channelService.createChannel(clientID);
+	ClientContext clientContext = (ClientContext) session.getAttribute(ClientContext.SESSION_KEY);
 	
-	String username = (String) request.getSession().getAttribute("username");
-	if (StringUtils.isEmpty(username)) {
-		username = "Anonymous";
+	if (clientContext != null) {
+		pageContext.setAttribute("loggedIn", "true");
 	}
-	
-	request.getSession().setAttribute(ClientContext.SESSION_KEY, new ClientContext(username));
-	
-	WebSocketManager.getInstance().addChannelInfo(clientID, channelToken);
-	
-	pageContext.setAttribute("username", username);
-	pageContext.setAttribute("channelToken", channelToken);
 %>
 
-</head>
-
-<body>
-	<jsp:include page="jsp/errWarnPanels.jsp">
-		<jsp:param value="${username}" name="username"/>
-	</jsp:include>
-	
+<c:choose>
+<c:when test="${loggedIn}">
 	<jsp:include page="jsp/chatPage.jsp"></jsp:include>
-	
-	<script type="text/javascript" language="javascript">
-	var username = '${username}';
-	var channel = new goog.appengine.Channel('${channelToken}');
-	var socket;
-
-	function initSocket() {
-		socket = channel.open();
-		socket.onopen = onOpened;
-		socket.onmessage = onMessage;
-		socket.onerror = function(errObj) {
-				showErrPanelWithTimeout(errObj.code + ": " + errObj.description, 20000);
-			};
-		socket.onclose = showWarnPanel("WebSocket connection lost.");
-	}
-	
-	initSocket();
-	</script>
-</body>
-</html>
+</c:when>
+<c:otherwise>
+	<jsp:include page="login.jsp"></jsp:include>
+</c:otherwise>
+</c:choose>

@@ -49,7 +49,7 @@ public class WebSocketManager {
 	}
 	
 	private synchronized List<String> getAllChatIds() {
-		return new ArrayList<>(CHANNELS.keySet());
+		return new ArrayList<String>(CHANNELS.keySet());
 	}
 	
 	public void broadcast(String message) {
@@ -65,7 +65,7 @@ public class WebSocketManager {
 			return;
 		}
 		
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("payload", payload);
 		map.put("handler", handler);
 		

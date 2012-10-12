@@ -1,4 +1,13 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+<?xml version="1.0" encoding="utf-8" standalone="no"?><web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fmt="http://java.sun.com/jsp/jstl/fmt" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<servlet>
+		<servlet-name>LoginOrRegisterServlet</servlet-name>
+		<servlet-class>org.krzysio.games.servlets.LoginOrRegisterServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LoginOrRegisterServlet</servlet-name>
+		<url-pattern>/loginOrRegister</url-pattern>
+	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>AjaxHandlerServlet</servlet-name>

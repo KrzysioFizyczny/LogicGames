@@ -19,7 +19,7 @@ public class ChannelInfo implements Serializable {
 	
 	public boolean addGroup(String group) {
 		if (groups == null) {
-			groups = new HashSet<>();
+			groups = new HashSet<String>();
 		}
 		
 		return groups.add(group);
