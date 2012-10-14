@@ -2,7 +2,6 @@ package org.krzysio.games.servlets;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -49,14 +48,18 @@ public class LoginOrRegisterServlet extends HttpServlet {
 	}
 
 	private void createNewUser(HttpServletRequest request) {
+		logger.entering(getClass().getName(), "createNewUser");
+		
 		String username = request.getParameter("username");
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		Entity user = findUser(datastore, username);
 		
 		if (user != null) {
+			logger.warning("User " + username + " not allowed");
 			request.setAttribute("ERR_MSG", "Entered Username is not allowed");
 			return;
 		}
+		
 		
 		String pass = request.getParameter("pass");
 		String confpass = request.getParameter("confpass");
@@ -65,19 +68,20 @@ public class LoginOrRegisterServlet extends HttpServlet {
 			request.setAttribute("ERR_MSG", "Incorrect password");
 			request.setAttribute("username_bak", username);
 			request.setAttribute("newUser_bak", Boolean.TRUE);
+			logger.warning("User password doesn't match its confirmation value.");
 			return;
 		}
 		
+		logger.info("Creating user " + username);
 		user = new Entity("User");
 		user.setProperty("username", username);
 		user.setProperty("pass", generatePassHash(pass));
 		user.setProperty("createdAt", new Date());
 		
 		datastore.put(user);
-		logger.log(Level.FINER, "User {} has been created", username);
-		request.getSession().setAttribute(ClientContext.SESSION_KEY, new ClientContext(username));
 		
-		return;
+		logger.info(String.format("User % has been created", username));
+		request.getSession().setAttribute(ClientContext.SESSION_KEY, new ClientContext(username));
 	}
 	
 	private void loginUser(HttpServletRequest request) {
@@ -101,8 +105,6 @@ public class LoginOrRegisterServlet extends HttpServlet {
 		}
 		
 		request.getSession().setAttribute(ClientContext.SESSION_KEY, new ClientContext(username));
-		
-		return;
 	}
 	
 	private Entity findUser(DatastoreService datastore, String username) {

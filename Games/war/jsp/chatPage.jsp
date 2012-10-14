@@ -31,10 +31,10 @@
 
 <script type="text/javascript" language="javascript">
 	var username = '${username}';
-	var channel = new goog.appengine.Channel('${channelToken}');
 	var socket;
 
-	function initSocket() {
+	function initSocket(channelToken) {
+		var channel = new goog.appengine.Channel(channelToken);
 		socket = channel.open();
 		socket.onopen = onOpened;
 		socket.onmessage = onMessage;
@@ -43,11 +43,11 @@
 					+ errObj.description, 20000);
 		};
 		socket.onclose = function() {
-			initSocket();
+			renewChannel();
 		};
 	}
 
-	initSocket();
+	initSocket('${channelToken}');
 </script>
 </body>
 </html>

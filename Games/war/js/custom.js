@@ -129,6 +129,29 @@ function onOpened() {
 	});
 }
 
+function renewChannel() {
+	$.ajax({
+		url: 'ajaxHandler',
+		type: 'POST',
+		data: { action     : 'renewChannel'
+			},
+		complete: function(resp, textStatus) {
+			if (textStatus == "success") {
+				var result = $.parseJSON(resp.responseText);
+				switch (result.status) {
+					case 'OK':
+						initSocket(result.channelToken);
+						break;
+					default:
+						showErrPanelWithTimeout("Connection lost and couldn't be renewed", 10000);
+				}
+			} else {
+				showWarnPanelWithTimeout("Connection error. Try again later.", 10000);
+			}
+		}
+	});
+}
+
 function onMessage(msg) {
 	if (!msg || !msg.data) {
 		return;

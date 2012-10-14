@@ -52,6 +52,9 @@ public class AjaxHandlerServlet extends HttpServlet {
 		} else if (action.equals("sayHello")) {
 			String username = req.getParameter("username");
 			WebSocketManager.getInstance().broadcast(String.format("User <strong>%s</strong> has joined", username));
+		} else if (action.equals("renewChannel")) {
+			String channelToken = clientContext.renewChannelToken();
+			ajaxResponseMap.put("channelToken", channelToken);
 		}
 		
 		
