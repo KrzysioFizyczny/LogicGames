@@ -16,9 +16,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.krzysio.games.ClientContext;
 import org.krzysio.games.WebSocketManager;
 import org.krzysio.games.enums.JsMessageHandler;
-import org.krzysio.games.json.MainChatMessage;
+import org.krzysio.games.json.ChatMessage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 
 /**
  * @author Chris
@@ -40,27 +43,49 @@ public class AjaxHandlerServlet extends HttpServlet {
 
 		} else if (action.equals("sendMsgToChat")) {
 			String htmlMsg = req.getParameter("html");
-			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:MM:ss");
-			
-			MainChatMessage mainChatMessage = new MainChatMessage();
-			mainChatMessage.setUsername(clientContext.getUsername());
-			mainChatMessage.setMessage(htmlMsg);
-			mainChatMessage.setDate(dateFormat.format(new Date()));
+			ChatMessage mainChatMessage = saveMessage(clientContext, null, htmlMsg);
 			
 			WebSocketManager.getInstance().broadcast(JsMessageHandler.MAIN_CHAT, mainChatMessage);
-			
 		} else if (action.equals("sayHello")) {
 			String username = req.getParameter("username");
 			WebSocketManager.getInstance().broadcast(String.format("User <strong>%s</strong> has joined", username));
 		} else if (action.equals("renewChannel")) {
 			String channelToken = clientContext.renewChannelToken();
 			ajaxResponseMap.put("channelToken", channelToken);
+		} else if (action.equals("createNewGame")) {
+			String gameName = req.getParameter("gameName");
+			ajaxResponseMap.put("id", "12");
+		} else if (action.equals("joinToGame")) {
+			String gameId = req.getParameter("gameId");
+			String gameName = req.getParameter("gameName");
+			gameId.length();
 		}
 		
 		
 		String result = mapper.writeValueAsString(ajaxResponseMap);
 		resp.getWriter().write(result);
-
+	}
+	
+	private ChatMessage saveMessage(ClientContext clientContext, String chatId, String htmlMsg) {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		Date now = new Date();
+		DateFormat dateFormat = new SimpleDateFormat(ChatMessage.DATE_FORMAT);
+		
+		Entity message = new Entity("Message");
+		message.setProperty("chatId", chatId);
+		message.setProperty("username", clientContext.getUsername());
+		message.setProperty("htmlMsg", htmlMsg);
+		message.setProperty("date", now);
+		
+		ChatMessage chatMessage = new ChatMessage();
+		chatMessage.setChatId(chatId);
+		chatMessage.setUsername(clientContext.getUsername());
+		chatMessage.setMessage(htmlMsg);
+		chatMessage.setDate(dateFormat.format(now));
+		
+		datastore.put(message);
+		
+		return chatMessage;
 	}
 
 }

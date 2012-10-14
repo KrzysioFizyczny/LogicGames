@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"pageEncoding="UTF-8"%>
 <%@page import="java.util.List"%>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -23,5 +24,13 @@
 </div>
 
 <section id="content">
-	<div align="right"><h3><c:out value="${param.username}"/></h3></div>
+	<div align="right">
+		<h2 onclick="byId('effect').toggle('fold', {}, 500);" style="cursor: pointer;"><c:out value="${param.username}"/></h2>
+		<div class="toggler">
+		    <div id="effect" class="ui-widget-content ui-corner-all" style="display: none;">
+		        <h3 class="ui-widget-header ui-corner-all" style="cursor: pointer;" onclick="doLogout();">Logout</h3>
+		        <h3 class="ui-widget-header ui-corner-all" style="cursor: pointer;" onclick="createNewGame();">Create new game</h3>
+		    </div>
+		</div>
+	</div>
 </section>

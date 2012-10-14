@@ -3,8 +3,11 @@ package org.krzysio.games.json;
 /**
  * @author krzysztof
  */
-public class MainChatMessage {
+public class ChatMessage {
+	
+	public static final String DATE_FORMAT = "yyyy-MM-dd HH:MM:ss";
 
+	private String chatId;
 	private String username;
 	private String message;
 	private String date;
@@ -31,6 +34,14 @@ public class MainChatMessage {
 
 	public void setDate(String date) {
 		this.date = date;
+	}
+
+	public String getChatId() {
+		return chatId;
+	}
+
+	public void setChatId(String chatId) {
+		this.chatId = chatId;
 	}
 
 }

@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?><web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fmt="http://java.sun.com/jsp/jstl/fmt" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
+	<filter>
+    	<filter-name>_ah_DevSocketFilter</filter-name>
+    	<filter-class>com.google.appengine.api.socket.dev.DevSocketFilter</filter-class>
+	<init-param>
+		<param-name>use-native-sockets</param-name>
+		<param-value>true</param-value>
+	</init-param>
+	</filter>
+
+  <filter-mapping>
+    <filter-name>_ah_DevSocketFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+	<!-- Login/registration handler -->
 	<servlet>
 		<servlet-name>LoginOrRegisterServlet</servlet-name>
 		<servlet-class>org.krzysio.games.servlets.LoginOrRegisterServlet</servlet-class>
@@ -9,6 +24,17 @@
 		<url-pattern>/loginOrRegister</url-pattern>
 	</servlet-mapping>
 	
+	<!-- Logout handler -->
+	<servlet>
+		<servlet-name>LogoutServlet</servlet-name>
+		<servlet-class>org.krzysio.games.servlets.LogoutServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LogoutServlet</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
+	
+	<!-- Handler for all ajax requests -->
 	<servlet>
 		<servlet-name>AjaxHandlerServlet</servlet-name>
 		<servlet-class>org.krzysio.games.servlets.AjaxHandlerServlet</servlet-class>
@@ -29,6 +55,26 @@
 	<servlet-mapping>
 		<servlet-name>SystemServiceServlet</servlet-name>
 		<url-pattern>/_ah/spi/*</url-pattern>
+	</servlet-mapping>
+	
+	<!-- On connected client handler -->
+	<servlet>
+		<servlet-name>OnConnectedServlet</servlet-name>
+		<servlet-class>org.krzysio.games.servlets.OnConnectedServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>OnConnectedServlet</servlet-name>
+		<url-pattern>/_ah/channel/connected/</url-pattern>
+	</servlet-mapping>
+	
+	<!-- On disconnected client handler -->
+	<servlet>
+		<servlet-name>OnDisconnectedServlet</servlet-name>
+		<servlet-class>org.krzysio.games.servlets.OnDisconnectedServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>OnDisconnectedServlet</servlet-name>
+		<url-pattern>/_ah/channel/disconnected/</url-pattern>
 	</servlet-mapping>
 	
 	<welcome-file-list>

@@ -59,6 +59,8 @@ $(function() {
 	if (errMessage.length > 0) {
 		showErrPanel(errMessage);
 	}
+
+	byId("aliasID").focus();
 	
 	toggleConfPassField();
 });

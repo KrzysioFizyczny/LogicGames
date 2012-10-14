@@ -33,13 +33,18 @@ public class LoginOrRegisterServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+		boolean isOK;
 		if (isNewUser(request)) {
-			createNewUser(request);
+			isOK = createNewUser(request);
 		} else {
-			loginUser(request);
+			isOK = loginUser(request);
 		}
 		
-		resp.sendRedirect("/");
+		if (isOK) {
+			resp.sendRedirect("/");
+		} else {
+			getServletContext().getRequestDispatcher("/login.jsp").forward(request, resp);
+		}
 	}
 	
 	private boolean isNewUser(HttpServletRequest request) {
@@ -47,7 +52,7 @@ public class LoginOrRegisterServlet extends HttpServlet {
 		return newUser != null && newUser.equalsIgnoreCase("on");
 	}
 
-	private void createNewUser(HttpServletRequest request) {
+	private boolean createNewUser(HttpServletRequest request) {
 		logger.entering(getClass().getName(), "createNewUser");
 		
 		String username = request.getParameter("username");
@@ -57,7 +62,7 @@ public class LoginOrRegisterServlet extends HttpServlet {
 		if (user != null) {
 			logger.warning("User " + username + " not allowed");
 			request.setAttribute("ERR_MSG", "Entered Username is not allowed");
-			return;
+			return false;
 		}
 		
 		
@@ -69,7 +74,7 @@ public class LoginOrRegisterServlet extends HttpServlet {
 			request.setAttribute("username_bak", username);
 			request.setAttribute("newUser_bak", Boolean.TRUE);
 			logger.warning("User password doesn't match its confirmation value.");
-			return;
+			return false;
 		}
 		
 		logger.info("Creating user " + username);
@@ -80,18 +85,20 @@ public class LoginOrRegisterServlet extends HttpServlet {
 		
 		datastore.put(user);
 		
-		logger.info(String.format("User % has been created", username));
+		logger.info(String.format("User %s has been created", username));
 		request.getSession().setAttribute(ClientContext.SESSION_KEY, new ClientContext(username));
+		
+		return true;
 	}
 	
-	private void loginUser(HttpServletRequest request) {
+	private boolean loginUser(HttpServletRequest request) {
 		String username = request.getParameter("username");
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		Entity user = findUser(datastore, username);
 		
 		if (user == null) {
 			request.setAttribute("ERR_MSG", "Entered Username is not correct");
-			return;
+			return false;
 		}
 		
 		String pass = request.getParameter("pass");
@@ -101,10 +108,11 @@ public class LoginOrRegisterServlet extends HttpServlet {
 		if (!dbPass.equals(pass)) {
 			request.setAttribute("ERR_MSG", "Incorrect password");
 			request.setAttribute("username_bak", username);
-			return;
+			return false;
 		}
 		
 		request.getSession().setAttribute(ClientContext.SESSION_KEY, new ClientContext(username));
+		return true;
 	}
 	
 	private Entity findUser(DatastoreService datastore, String username) {

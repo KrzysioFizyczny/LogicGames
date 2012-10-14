@@ -48,6 +48,17 @@ public class WebSocketManager {
 		return channelInfo;
 	}
 	
+	public ChannelInfo removeChannel(String clientId) {
+		return CHANNELS.remove(clientId);
+	}
+	
+	public void markChannelAsActive(String clientId, boolean active) {
+		ChannelInfo channelInfo = CHANNELS.get(clientId);
+		if (channelInfo != null) {
+			channelInfo.setActive(active);
+		}
+	}
+	
 	private synchronized List<String> getAllChatIds() {
 		return new ArrayList<String>(CHANNELS.keySet());
 	}

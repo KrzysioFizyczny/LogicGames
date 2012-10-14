@@ -152,6 +152,96 @@ function renewChannel() {
 	});
 }
 
+function doLogout() {
+	document.location = "logout";
+}
+
+function createNewGame() {
+	byId("createGameDialog").dialog('open');
+}
+
+function createNewGameOnEnter(event) {
+	if (event.keyCode == 13) {
+		createNewGameConfirm();
+	}
+}
+
+function createNewGameConfirm() {
+	var gameName = byId("newGamesName").val();
+	if (!gameName || gameName.length == 0) {
+		showErrPanelWithTimeout("Game's name is required.", 10000);
+		return;
+	}
+	
+	byId("createGameDialog").dialog('close');
+	
+	$.ajax({
+		url: 'ajaxHandler',
+		type: 'POST',
+		data: {action: 'createNewGame',
+				'gameName': gameName
+			},
+		complete: function(resp, textStatus) {
+			if (textStatus == "success") {
+				var result = $.parseJSON(resp.responseText);
+				switch (result.status) {
+					case 'OK':
+						byId("newGamesName").val("");
+						joinToGame(result.id, gameName);
+						break;
+					default:
+						showErrPanelWithTimeout("There was an error. We are alredy working on it.", 10000);
+				}
+			} else {
+				showWarnPanelWithTimeout("Connection error. Try again later.", 10000);
+			}
+		}
+	});
+}
+
+function joinToGame(gameId, gameName) {
+	if (selectGameIfOpen(gameId)) {
+		return;
+	}
+	
+	$.ajax({
+		url: 'ajaxHandler',
+		type: 'POST',
+		data: {  action    : 'joinToGame',
+				'gameId'   : gameId,
+				'gameName' : gameName
+			},
+		complete: function(resp, textStatus) {
+			if (textStatus == "success") {
+				var result = $.parseJSON(resp.responseText);
+				switch (result.status) {
+					case 'OK':
+						var tabIdx = byId("tabs").tabs("length");
+						tabsConfig.push({'gameId' : gameId, 'tabIdx' : tabIdx});
+						byId("tabs").tabs("add", "jsp/gameTab.jsp?gameId=" + gameId, gameName);
+						byId("tabs").tabs("select", tabIdx);
+						break;
+					default:
+						showErrPanelWithTimeout("There was an error. We are alredy working on it.", 10000);
+				}
+			} else {
+				showWarnPanelWithTimeout("Connection error. Try again later.", 10000);
+			}
+		}
+	});
+}
+
+function selectGameIfOpen(gameId) {
+	for (var i = 0; i < tabsConfig.length; i++) {
+		if (tabsConfig[i].gameId == gameId) {
+			byId("tabs").tabs("select", tabsConfig[i].tabIdx);
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 function onMessage(msg) {
 	if (!msg || !msg.data) {
 		return;

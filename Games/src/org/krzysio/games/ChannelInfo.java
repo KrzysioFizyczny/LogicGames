@@ -14,6 +14,7 @@ public class ChannelInfo implements Serializable {
 
 	private String clientID;
 	private String token;
+	private boolean active = true;
 	
 	private Set<String> groups;
 	
@@ -51,6 +52,22 @@ public class ChannelInfo implements Serializable {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public Set<String> getGroups() {
+		return groups;
+	}
+
+	public void setGroups(Set<String> groups) {
+		this.groups = groups;
 	}
 	
 }

@@ -39,3 +39,21 @@ ul#icons span.ui-icon {
 	float: left;
 	margin: 0 4px;
 }
+
+.toggler {
+	width: 200px;
+	height: 50px;
+}
+
+#effect {
+	position: relative;
+	width: 120px;
+	padding: 0.4em;
+	z-index: 100;
+}
+
+#effect h3 {
+	margin: 1px;
+	padding: 0.4em;
+	text-align: center;
+}
