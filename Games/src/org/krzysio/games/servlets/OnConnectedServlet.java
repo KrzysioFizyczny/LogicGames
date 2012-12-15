@@ -27,7 +27,7 @@ public class OnConnectedServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ChannelService channelService = ChannelServiceFactory.getChannelService();
 		ChannelPresence presence = channelService.parsePresence(req);
-
+		
 		if (presence.isConnected()) {
 			logger.info("Connecting clientId=" + presence.clientId());
 			WebSocketManager.getInstance().markChannelAsActive(presence.clientId(), true);

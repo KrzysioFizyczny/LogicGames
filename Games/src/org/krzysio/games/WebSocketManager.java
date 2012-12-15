@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 /**
  * @author krzysztof
@@ -32,6 +34,11 @@ public class WebSocketManager {
 	private final Map<String, ChannelInfo> CHANNELS = new HashMap<String, ChannelInfo>();
 
 	private WebSocketManager() {
+		
+	}
+	
+	private MemcacheService getMemcacheService() {
+		return MemcacheServiceFactory.getMemcacheService("CHANNELS");
 	}
 
 	public static WebSocketManager getInstance() {
@@ -42,18 +49,18 @@ public class WebSocketManager {
 		ChannelInfo channelInfo = new ChannelInfo();
 		channelInfo.setClientID(clientID);
 		channelInfo.setToken(token);
-
-		CHANNELS.put(clientID, channelInfo);
+		
+		getMemcacheService().put(clientID, channelInfo);
 
 		return channelInfo;
 	}
 	
-	public ChannelInfo removeChannel(String clientId) {
-		return CHANNELS.remove(clientId);
+	public boolean removeChannel(String clientId) {
+		return getMemcacheService().delete(clientId);
 	}
 	
 	public void markChannelAsActive(String clientId, boolean active) {
-		ChannelInfo channelInfo = CHANNELS.get(clientId);
+		ChannelInfo channelInfo = (ChannelInfo) getMemcacheService().get(clientId);
 		if (channelInfo != null) {
 			channelInfo.setActive(active);
 		}

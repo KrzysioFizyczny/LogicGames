@@ -51,22 +51,19 @@ function byId(nodeId) {
 	return $("#" + nodeId);
 }
 
-function sendMsgToChat(chatId, inputId) {
-	var html = byId(inputId).html();
-	
+function typicalAjax(dataIn, onOkFunction) {
 	$.ajax({
 		url: 'ajaxHandler',
 		type: 'POST',
-		data: { action     : 'sendMsgToChat',
-				'chatId'   : chatId,
-				'html'     : html
-			},
+		data: dataIn,
 		complete: function(resp, textStatus) {
 			if (textStatus == "success") {
 				var result = $.parseJSON(resp.responseText);
 				switch (result.status) {
 					case 'OK':
-						byId(inputId).val("");
+						if (onOkFunction) {
+							onOkFunction(result);
+						}
 						break;
 					default:
 						showErrPanelWithTimeout("There was an error. We are already working on it.", 10000);
@@ -76,6 +73,19 @@ function sendMsgToChat(chatId, inputId) {
 			}
 		}
 	});
+}
+
+function sendMsgToChat(chatId, inputId) {
+	var html = byId(inputId).html();
+	var dataIn = {action     : 'sendMsgToChat',
+				  'chatId'   : chatId,
+				  'html'     : html
+				 };
+	var onOk = function(result) {
+		byId(inputId).val("");
+	};
+	
+	typicalAjax(dataIn, onOk);
 }
 
 function handleIncomingMsg(data) {
@@ -107,49 +117,19 @@ function handleIncomingMsg(data) {
 }
 
 function onOpened() {
-	$.ajax({
-		url: 'ajaxHandler',
-		type: 'POST',
-		data: { action     : 'sayHello',
-				'username' : username
-			},
-		complete: function(resp, textStatus) {
-			if (textStatus == "success") {
-				var result = $.parseJSON(resp.responseText);
-				switch (result.status) {
-					case 'OK':
-						break;
-					default:
-						showErrPanelWithTimeout("There was an error. We are already working on it.", 10000);
-				}
-			} else {
-				showWarnPanelWithTimeout("Connection error. Try again later.", 10000);
-			}
-		}
-	});
+	var dataIn = { action    : 'sayHello',
+				  'username' : username
+				 };
+	typicalAjax(dataIn, null);
 }
 
 function renewChannel() {
-	$.ajax({
-		url: 'ajaxHandler',
-		type: 'POST',
-		data: { action     : 'renewChannel'
-			},
-		complete: function(resp, textStatus) {
-			if (textStatus == "success") {
-				var result = $.parseJSON(resp.responseText);
-				switch (result.status) {
-					case 'OK':
-						initSocket(result.channelToken);
-						break;
-					default:
-						showErrPanelWithTimeout("Connection lost and couldn't be renewed", 10000);
-				}
-			} else {
-				showWarnPanelWithTimeout("Connection error. Try again later.", 10000);
-			}
-		}
-	});
+	var dataIn = {action : 'renewChannel'};
+	var onOk = function(result) {
+		initSocket(result.channelToken);
+	};
+	
+	typicalAjax(dataIn, onOk);
 }
 
 function doLogout() {
@@ -174,29 +154,15 @@ function createNewGameConfirm() {
 	}
 	
 	byId("createGameDialog").dialog('close');
+	var dataIn = { action: 'createNewGame',
+				  'gameName': gameName
+				 };
+	var onOk = function(result) {
+		byId("newGamesName").val("");
+		joinToGame(result.id, gameName);
+	}
 	
-	$.ajax({
-		url: 'ajaxHandler',
-		type: 'POST',
-		data: {action: 'createNewGame',
-				'gameName': gameName
-			},
-		complete: function(resp, textStatus) {
-			if (textStatus == "success") {
-				var result = $.parseJSON(resp.responseText);
-				switch (result.status) {
-					case 'OK':
-						byId("newGamesName").val("");
-						joinToGame(result.id, gameName);
-						break;
-					default:
-						showErrPanelWithTimeout("There was an error. We are alredy working on it.", 10000);
-				}
-			} else {
-				showWarnPanelWithTimeout("Connection error. Try again later.", 10000);
-			}
-		}
-	});
+	typicalAjax(dataIn, onOk);
 }
 
 function joinToGame(gameId, gameName) {
@@ -204,31 +170,18 @@ function joinToGame(gameId, gameName) {
 		return;
 	}
 	
-	$.ajax({
-		url: 'ajaxHandler',
-		type: 'POST',
-		data: {  action    : 'joinToGame',
-				'gameId'   : gameId,
-				'gameName' : gameName
-			},
-		complete: function(resp, textStatus) {
-			if (textStatus == "success") {
-				var result = $.parseJSON(resp.responseText);
-				switch (result.status) {
-					case 'OK':
-						var tabIdx = byId("tabs").tabs("length");
-						tabsConfig.push({'gameId' : gameId, 'tabIdx' : tabIdx});
-						byId("tabs").tabs("add", "jsp/gameTab.jsp?gameId=" + gameId, gameName);
-						byId("tabs").tabs("select", tabIdx);
-						break;
-					default:
-						showErrPanelWithTimeout("There was an error. We are alredy working on it.", 10000);
-				}
-			} else {
-				showWarnPanelWithTimeout("Connection error. Try again later.", 10000);
-			}
-		}
-	});
+	var dataIn = { action    : 'joinToGame',
+				  'gameId'   : gameId,
+				  'gameName' : gameName
+				 };
+	var onOk = function(result) {
+		var tabIdx = byId("tabs").tabs("length");
+		tabsConfig.push({'gameId' : gameId, 'tabIdx' : tabIdx});
+		byId("tabs").tabs("add", "jsp/gameTab.jsp?gameId=" + gameId, gameName);
+		byId("tabs").tabs("select", tabIdx);
+	}
+	
+	typicalAjax(dataIn, onOk);
 }
 
 function selectGameIfOpen(gameId) {
